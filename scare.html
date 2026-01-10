@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>...</title>
+
+<style>
+  body {
+    background: black;
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+
+  #man {
+    width: 300px;
+    margin-top: 40px;
+  }
+
+  #text {
+    font-size: 24px;
+    margin-top: 20px;
+  }
+
+  #jumpscare {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+  }
+
+  #jumpscare img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+</head>
+
+<body>
+
+<img id="man" src="images/man.png" alt="Man">
+<div id="text">
+  Deze man is <span id="distance">4000</span> kilometer van u verwijderd.
+</div>
+
+<div id="jumpscare">
+  <img src="images/jumpscare.png" alt="BOO">
+</div>
+
+<audio id="scream" src="audio/scream.mp3"></audio>
+
+<script>
+let distance = 4000;
+const el = document.getElementById("distance");
+
+const interval = setInterval(() => {
+  distance -= 25;               // snelheid
+  el.textContent = distance;
+
+  if (distance <= 0) {
+    clearInterval(interval);
+    triggerJumpscare();
+  }
+}, 20); // lager = sneller
+
+function triggerJumpscare() {
+  document.getElementById("jumpscare").style.display = "block";
+  document.getElementById("scream").play();
+}
+</script>
+
+</body>
+</html>
 
