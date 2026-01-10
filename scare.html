@@ -6,7 +6,6 @@
 <title>Virus Effect</title>
 
 <style>
-/* --- BASISSTIJLEN --- */
 body {
   background: black;
   color: white;
@@ -31,12 +30,12 @@ body {
 }
 
 #text {
-  font-size: 5vw; /* past zich aan schermbreedte aan */
+  font-size: 5vw; 
   margin-top: 2vh;
   position: relative;
 }
 
-/* --- GLITCH EFFECT --- */
+/* GLITCH EFFECT */
 .glitch {
   animation: glitch 0.15s infinite;
 }
@@ -50,7 +49,7 @@ body {
   100% { transform: translate(0); }
 }
 
-/* --- SCREEN SHAKE --- */
+/* SCREEN SHAKE */
 @keyframes shake {
   0% { transform: translate(0, 0); }
   25% { transform: translate(-10px, 10px); }
@@ -59,11 +58,11 @@ body {
   100% { transform: translate(0, 0); }
 }
 
-/* --- RODE SCHERM FLITS --- */
+/* RODE SCHERM FLITS */
 .flash-red {
   position: fixed;
   inset: 0;
-  background: rgba(100,0,0,0.9); /* zeer donker rood */
+  background: rgba(100,0,0,0.9);
   z-index: 999;
   display: none;
 }
@@ -93,7 +92,7 @@ const scream = document.getElementById("scream");
 const glitchSound = document.getElementById("glitchSound");
 const flash = document.getElementById("flash");
 
-// alleen jouw berichten
+// jouw berichten
 const messages = [
   "DE GIJZELER KOMT JE HALEN!",
   "DIT IS ZEER ONGEPAST!",
@@ -102,17 +101,17 @@ const messages = [
   "В стенах плесень, они идут тебя забрать!!!"
 ];
 
-// Vloeiend: 60 updates per seconde
+// FPS
 const fps = 60;
-const speedPerInterval = 20 / fps; // 20 km/s verdeeld over 60 updates
+const speedPerInterval = 60 / fps; // 60 km/s verdeeld over 60 updates
 
 const countdown = setInterval(() => {
   distance -= speedPerInterval;
   if (distance < 0) distance = 0;
   distanceEl.textContent = Math.floor(distance);
 
-  // zeldzame glitch (5%)
-  if (Math.random() < 0.05) {
+  // zeer zeldzame glitch (2% kans)
+  if (Math.random() < 0.02) {
     textEl.classList.add("glitch");
     textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
 
@@ -134,18 +133,17 @@ const countdown = setInterval(() => {
     setTimeout(() => { flash.style.display = "none"; }, 100);
   }
 
-  // trigger jumpscare
+  // jumpscare
   if (distance <= 0) {
     clearInterval(countdown);
     scream.play();
-    manImg.src = "/images/jumpscare.png"; // vervang afbeelding
+    manImg.src = "images/jumpscare.png"; // correcte vervanging
     // extra chaos bij 0 km
     const chaosInterval = setInterval(() => {
       textEl.style.transform = `translate(${Math.random()*20-10}px, ${Math.random()*20-10}px) rotate(${Math.random()*20-10}deg)`;
       if (Math.random() < 0.05) {
         textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
       }
-      // extra flitsen
       if (Math.random() < 0.05) {
         flash.style.display = "block";
         setTimeout(() => { flash.style.display = "none"; }, 100);
@@ -158,5 +156,6 @@ const countdown = setInterval(() => {
 
 </body>
 </html>
+
 
 
