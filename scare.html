@@ -2,74 +2,152 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>...</title>
+<title>Virus Effect</title>
 
 <style>
-  body {
-    background: black;
-    color: white;
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
+body {
+  background: black;
+  color: white;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  transition: background 0.2s;
+}
 
-  #man {
-    width: 300px;
-    margin-top: 40px;
-  }
+#man {
+  width: 300px;
+  margin-top: 40px;
+  animation: subtleZoom 5s infinite alternate;
+}
 
-  #text {
-    font-size: 24px;
-    margin-top: 20px;
-  }
+@keyframes subtleZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
 
-  #jumpscare {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-  }
+#text {
+  font-size: 26px;
+  margin-top: 20px;
+  position: relative;
+}
 
-  #jumpscare img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+/* GLITCH EFFECT */
+.glitch {
+  animation: glitch 0.15s infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-5px, 5px) skew(1deg, 1deg); }
+  40% { transform: translate(5px, -5px) skew(-1deg, -1deg); }
+  60% { transform: translate(-3px, 3px) skew(1deg, -1deg); }
+  80% { transform: translate(3px, -3px) skew(-1deg, 1deg); }
+  100% { transform: translate(0); }
+}
+
+/* SCREEN SHAKE */
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-10px, 10px); }
+  50% { transform: translate(10px, -10px); }
+  75% { transform: translate(-10px, 10px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* RANDOM COLOR FLASH */
+.flash {
+  animation: flashColors 0.1s infinite;
+}
+
+@keyframes flashColors {
+  0% { background: black; color: white; }
+  25% { background: red; color: yellow; }
+  50% { background: blue; color: lime; }
+  75% { background: purple; color: cyan; }
+  100% { background: black; color: white; }
+}
 </style>
 </head>
 
 <body>
 
 <img id="man" src="images/man.png" alt="Man">
+
 <div id="text">
   Deze man is <span id="distance">4000</span> kilometer van u verwijderd.
 </div>
 
-<div id="jumpscare">
-  <img src="images/jumpscare.png" alt="BOO">
-</div>
-
 <audio id="scream" src="audio/scream.mp3"></audio>
+<audio id="glitchSound" src="audio/glitch.mp3"></audio> <!-- voeg een kort glitch-geluid toe -->
 
 <script>
 let distance = 4000;
-const el = document.getElementById("distance");
+const distanceEl = document.getElementById("distance");
+const textEl = document.getElementById("text");
+const body = document.body;
+const scream = document.getElementById("scream");
+const glitchSound = document.getElementById("glitchSound");
 
-const interval = setInterval(() => {
-  distance -= 25;               // snelheid
-  el.textContent = distance;
+const messages = [
+  "DE GIJZELER KOMT JE HALEN!",
+  "DIT IS ZEER ONGEPAST!",
+  "JE HAD NOOIT MOETEN PRANKCALLEN!",
+  "МАСТЕР GIJS ПРИБЛИЖАЕТСЯ!!!",
+  "В стенах плесень, они идут тебя забрать!!!",
+  "JE COMPUTER IS GEÏNFECTEERD!",
+  "ALLES IS VERLOREN!",
+  "HET EIND KOMT SNEL!"
+];
 
-  if (distance <= 0) {
-    clearInterval(interval);
-    triggerJumpscare();
+// countdown: vloeiend, 60 updates per seconde
+const interval = 1000 / 60; // 60 FPS
+const speedPerInterval = 50 / 8; // verdeel 50 km/s over 8 updates per seconde equivalent
+
+const countdown = setInterval(() => {
+  distance -= speedPerInterval;
+  if (distance < 0) distance = 0;
+  distanceEl.textContent = Math.floor(distance);
+
+  // willekeurige glitch effecten
+  if (Math.random() < 0.1) {
+    // glitch tekst
+    textEl.classList.add("glitch");
+    textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+
+    // korte audio glitch
+    glitchSound.currentTime = 0;
+    glitchSound.play();
+
+    // achtergrond flash
+    body.classList.add("flash");
+
+    // scherm shake
+    body.style.animation = "shake 0.2s";
+
+    // reset effecten na korte tijd
+    setTimeout(() => {
+      textEl.classList.remove("glitch");
+      body.classList.remove("flash");
+      body.style.animation = "";
+      textEl.innerHTML = `Deze man is <span id="distance">${Math.floor(distance)}</span> kilometer van u verwijderd.`;
+    }, 300);
   }
-}, 20); // lager = sneller
 
-function triggerJumpscare() {
-  document.getElementById("jumpscare").style.display = "block";
-  document.getElementById("scream").play();
-}
+  // trigger scream wanneer dichtbij
+  if (distance <= 0) {
+    clearInterval(countdown);
+    scream.play();
+    // extra chaos bij 0 km
+    const chaosInterval = setInterval(() => {
+      body.style.background = `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})`;
+      textEl.style.transform = `translate(${Math.random()*30-15}px, ${Math.random()*30-15}px) rotate(${Math.random()*30-15}deg)`;
+      if (Math.random() < 0.05) {
+        textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+      }
+    }, 50);
+  }
+
+}, interval);
 </script>
 
 </body>
