@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virus Effect</title>
+<title>Scare Effect</title>
 
 <style>
 body {
@@ -13,44 +13,108 @@ body {
   font-family: Arial, sans-serif;
   overflow: hidden;
   margin: 0;
+  padding: 0;
+  transition: background 0.2s;
 }
 
-/* eindscherm */
-#endScreen {
+#man {
+  width: 80%;
+  max-width: 300px;
+  margin-top: 40px;
+  animation: subtleZoom 5s infinite alternate;
+}
+
+@keyframes subtleZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+#text {
+  font-size: 5vw;
+  margin-top: 2vh;
+  position: relative;
+}
+
+/* GLITCH EFFECT */
+.glitch {
+  animation: glitch 0.15s infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-5px, 5px) skew(1deg, 1deg); }
+  40% { transform: translate(5px, -5px) skew(-1deg, -1deg); }
+  60% { transform: translate(-3px, 3px) skew(1deg, -1deg); }
+  80% { transform: translate(3px, -3px) skew(-1deg, 1deg); }
+  100% { transform: translate(0); }
+}
+
+/* SCREEN SHAKE */
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-10px, 10px); }
+  50% { transform: translate(10px, -10px); }
+  75% { transform: translate(-10px, 10px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* RODE SCHERM FLITS */
+.flash-red {
   position: fixed;
   inset: 0;
-  background: black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background: rgba(100,0,0,0.9);
+  z-index: 999;
+  display: none;
 }
 
-/* knipperende rode tekst */
-.blink-red {
-  color: red;
-  font-size: 4vw;
-  animation: blink 0.8s infinite;
-  text-align: center;
-}
-
+/* KNIPPERENDE TEKST */
 @keyframes blink {
   0%, 50%, 100% { opacity: 1; }
   25%, 75% { opacity: 0; }
+}
+
+.blink-red {
+  color: red;
+  font-size: 4vw;
+  text-align: center;
+  animation: blink 0.8s infinite;
 }
 </style>
 </head>
 
 <body>
 
+<img id="man" src="images/man.png" alt="Man">
+
 <div id="text">
   Deze man is <span id="distance">4000</span> kilometer van u verwijderd.
 </div>
 
+<div id="flash" class="flash-red"></div>
+
+<audio id="scream" src="audio/scream.mp3"></audio>
+<audio id="glitchSound" src="audio/glitch.mp3"></audio>
+
 <script>
 let distance = 4000;
 const distanceEl = document.getElementById("distance");
+const textEl = document.getElementById("text");
+const manImg = document.getElementById("man");
+const body = document.body;
+const scream = document.getElementById("scream");
+const glitchSound = document.getElementById("glitchSound");
+const flash = document.getElementById("flash");
 
+// berichten voor glitches
+const messages = [
+  "DE GIJZELER KOMT JE HALEN!",
+  "DIT IS ZEER ONGEPAST!",
+  "JE HAD NOOIT MOETEN PRANKCALLEN!",
+  "МАСТЕР GIJS ПРИБЛИЖАЕТСЯ!!!",
+  "В стенах плесень, они идут тебя забрать!!!"
+];
+
+// IP-adressen voor het eindscherm
 const ipTexts = [
   "103.200.109.255",
   "107.151.194.255",
@@ -64,36 +128,70 @@ const ipTexts = [
 ];
 
 const fps = 60;
-const speedPerInterval = 60 / fps;
+const speedPerInterval = 60 / fps; // 60 km/s verdeeld over 60 updates
 
 const countdown = setInterval(() => {
   distance -= speedPerInterval;
   if (distance < 0) distance = 0;
   distanceEl.textContent = Math.floor(distance);
 
+  // zeer zeldzame glitch (2% kans)
+  if (Math.random() < 0.02) {
+    textEl.classList.add("glitch");
+    textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+    glitchSound.currentTime = 0;
+    glitchSound.play();
+    body.style.animation = "shake 0.2s";
+    setTimeout(() => {
+      textEl.classList.remove("glitch");
+      body.style.animation = "";
+      textEl.innerHTML = `Deze man is <span id="distance">${Math.floor(distance)}</span> kilometer van u verwijderd.`;
+    }, 400);
+  }
+
+  // willekeurige rode flits
+  if (Math.random() < 0.02) {
+    flash.style.display = "block";
+    setTimeout(() => { flash.style.display = "none"; }, 100);
+  }
+
+  // EINDE BIJ 0 KM
   if (distance <= 0) {
     clearInterval(countdown);
 
-    // alles verwijderen
-    document.body.innerHTML = "";
-    document.body.style.background = "black";
+    // speel jumpscare geluid
+    scream.currentTime = 0;
+    scream.play();
 
-    const ip = ipTexts[Math.floor(Math.random() * ipTexts.length)];
+    // behoud afbeelding tot einde
+    manImg.src = "images/jumpscare.png";
 
-    const endScreen = document.createElement("div");
-    endScreen.id = "endScreen";
+    // korte delay voor jumpscare
+    setTimeout(() => {
+      // alles verwijderen voor intimiderend effect
+      document.body.innerHTML = "";
+      document.body.style.background = "black";
 
-    const text = document.createElement("div");
-    text.className = "blink-red";
-    text.innerHTML = `
-      ${ip}<br><br>
-      We hebben al je gegevens.<br>
-      Stuur 0.03423 bitcoin naar<br>
-      https//:Crypto.transfer/cashapp/filesnatcher/1011010101/RemoteAcces/Russia.com/
-    `;
+      const ip = ipTexts[Math.floor(Math.random() * ipTexts.length)];
 
-    endScreen.appendChild(text);
-    document.body.appendChild(endScreen);
+      const endScreen = document.createElement("div");
+      endScreen.className = "blink-red";
+      endScreen.innerHTML = `
+        ${ip}<br><br>
+        We hebben al je gegevens.<br>
+        Stuur 0.03423 bitcoin naar<br>
+        https//:Crypto.transfer/cashapp/filesnatcher/1011010101/RemoteAcces/Russia.com/
+      `;
+
+      endScreen.style.display = "flex";
+      endScreen.style.alignItems = "center";
+      endScreen.style.justifyContent = "center";
+      endScreen.style.height = "100vh";
+      endScreen.style.flexDirection = "column";
+
+      document.body.appendChild(endScreen);
+
+    }, 1500); // 1,5 sec jumpscare delay
   }
 
 }, 1000 / fps);
@@ -101,6 +199,7 @@ const countdown = setInterval(() => {
 
 </body>
 </html>
+
 
 
 
