@@ -94,6 +94,7 @@ body {
 
 <audio id="scream" src="audio/scream.mp3"></audio>
 <audio id="glitchSound" src="audio/glitch.mp3"></audio>
+<audio id="randomAudio"></audio>
 
 <script>
 let distance = 4000;
@@ -103,9 +104,10 @@ const manImg = document.getElementById("man");
 const body = document.body;
 const scream = document.getElementById("scream");
 const glitchSound = document.getElementById("glitchSound");
+const randomAudio = document.getElementById("randomAudio");
 const flash = document.getElementById("flash");
 
-// berichten voor glitches
+/* glitch teksten */
 const messages = [
   "DE GIJZELER KOMT JE HALEN!",
   "DIT IS ZEER ONGEPAST!",
@@ -114,7 +116,7 @@ const messages = [
   "В стенах плесень, они идут тебя забрать!!!"
 ];
 
-// IP-adressen voor het eindscherm
+/* fake IP's */
 const ipTexts = [
   "103.200.109.255",
   "107.151.194.255",
@@ -127,53 +129,64 @@ const ipTexts = [
   "52.143.208.255"
 ];
 
-const fps = 60;
-const speedPerInterval = 60 / fps; // 60 km/s verdeeld over 60 updates
+/* random audio uit jouw Audio map */
+const randomSounds = [
+  "audio/door.mp3",
+  "audio/doorbell.mp3",
+  "audio/footsteps.mp3",
+  "audio/glass.mp3",
+  "audio/gun.mp3",
+  "audio/heartbeat.mp3",
+  "audio/palsrok.mp3",
+  "audio/scream.mp3",
+  "audio/thunder.mp3",
+  "audio/Knock"
+];
 
+const fps = 60;
+const speedPerInterval = 60 / fps;
+
+/* AFSTAND TIMER */
 const countdown = setInterval(() => {
   distance -= speedPerInterval;
   if (distance < 0) distance = 0;
   distanceEl.textContent = Math.floor(distance);
 
-  // zeer zeldzame glitch (2% kans)
+  /* glitch kans */
   if (Math.random() < 0.02) {
     textEl.classList.add("glitch");
     textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
     glitchSound.currentTime = 0;
     glitchSound.play();
     body.style.animation = "shake 0.2s";
+
     setTimeout(() => {
       textEl.classList.remove("glitch");
       body.style.animation = "";
-      textEl.innerHTML = `Deze man is <span id="distance">${Math.floor(distance)}</span> kilometer van u verwijderd.`;
+      textEl.innerHTML =
+        `Deze man is <span id="distance">${Math.floor(distance)}</span> kilometer van u verwijderd.`;
     }, 400);
   }
 
-  // willekeurige rode flits
+  /* rode flits */
   if (Math.random() < 0.02) {
     flash.style.display = "block";
-    setTimeout(() => { flash.style.display = "none"; }, 100);
+    setTimeout(() => flash.style.display = "none", 100);
   }
 
-  // EINDE BIJ 0 KM
+  /* EINDE */
   if (distance <= 0) {
     clearInterval(countdown);
 
-    // speel jumpscare geluid
     scream.currentTime = 0;
     scream.play();
-
-    // behoud afbeelding tot einde
     manImg.src = "images/jumpscare.png";
 
-    // korte delay voor jumpscare
     setTimeout(() => {
-      // alles verwijderen voor intimiderend effect
       document.body.innerHTML = "";
       document.body.style.background = "black";
 
       const ip = ipTexts[Math.floor(Math.random() * ipTexts.length)];
-
       const endScreen = document.createElement("div");
       endScreen.className = "blink-red";
       endScreen.innerHTML = `
@@ -190,15 +203,30 @@ const countdown = setInterval(() => {
       endScreen.style.flexDirection = "column";
 
       document.body.appendChild(endScreen);
-
-    }, 1500); // 1,5 sec jumpscare delay
+    }, 1500);
   }
-
 }, 1000 / fps);
+
+/* RANDOM AUDIO LOGICA – elke 5 sec */
+setInterval(() => {
+  let chance = 0.1;
+
+  if (distance <= 3000) chance = 0.2;
+  if (distance <= 2000) chance = 0.3;
+  if (distance <= 1000) chance = 0.8;
+
+  if (Math.random() < chance) {
+    const sound = randomSounds[Math.floor(Math.random() * randomSounds.length)];
+    randomAudio.src = sound;
+    randomAudio.currentTime = 0;
+    randomAudio.play().catch(() => {});
+  }
+}, 5000);
 </script>
 
 </body>
 </html>
+
 
 
 
